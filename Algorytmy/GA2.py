@@ -39,9 +39,10 @@ def crossover(parent1, parent2):
             idx += 1
     return child
 
-def mutate_swap(individual):
-    idx1, idx2 = random.sample(range(len(individual)), 2)
-    individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
+def mutate_swap(individual, mutation_rate):
+    if random.uniform(0, 1) < mutation_rate:
+        idx1, idx2 = random.sample(range(len(individual)), 2)
+        individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
     return individual
 
 def mutate_inversion(individual, mutation_rate):
@@ -51,6 +52,7 @@ def mutate_inversion(individual, mutation_rate):
             start, end = end, start
         individual[start:end + 1] = reversed(individual[start:end + 1])
     return individual
+
 
 def genetic_algorithm(distance_matrix, population_size, max_generations=1000, max_stagnation=500, mutation_rate=0.1, crossover_rate=0.8, mutation_method=mutate_inversion):
     num_cities = len(distance_matrix)
@@ -102,12 +104,12 @@ distance_matrix = read_distance_matrix(file_path)
 
 
 
-population_size = 500
-max_generations = 1000
-max_stagnation = 500
-mutation_rate = 0.1
+population_size = 55
+max_generations = 1000000
+max_stagnation = 600
+mutation_rate = 0.05
 crossover_rate = 0.8
-mutation_method = mutate_inversion    # Wybierz jeden z mutate_swap lub mutate_inversion
+mutation_method = mutate_swap    # Wybór jedenj z mutacji:  mutate_swap lub mutate_inversion
 
 best_route, best_fitness = genetic_algorithm(distance_matrix, population_size, max_generations, max_stagnation, mutation_rate, crossover_rate, mutation_method)
 
@@ -141,9 +143,6 @@ best_route, best_fitness = genetic_algorithm(distance_matrix, population_size, m
 #     plot_results(parameter_values, fitness_results, parameter_name)
 
 # Wczytaj macierz odległości z pliku Excel
-file_path = "Dane/Przykład_TSP_29.xlsx"
-distance_matrix = read_distance_matrix(file_path)
-
 # # Parametry eksperymentu
 # population_sizes = [1000, 5000, 10000]
 # max_generation_values = [10000, 50000, 100000]
@@ -161,24 +160,24 @@ distance_matrix = read_distance_matrix(file_path)
 print("Najlepsza trasa:", best_route)
 print("Najlepsze przystosowanie:", best_fitness)
 
-# Wyświetl wyniki
+# Wyświetlenie wyników
 print("Miasta po kolei:")
 for city in best_route:
     print(city + 1)
 
-# Wyświetl odległości między miastami
+# Wyświetlenie odległości między miastami
 print("\nOdległości między miastami:")
 for i in range(len(best_route) - 1):
     city1, city2 = best_route[i], best_route[i + 1]
     distance = distance_matrix[city1, city2]
     print(distance)
 
-# Dodaj odległość między ostatnim a pierwszym miastem
+# Dodanie odległość między ostatnim a pierwszym miastem
 last_city, first_city = best_route[-1], best_route[0]
 distance = distance_matrix[last_city, first_city]
 print(distance)
 
- # Wyświetl długość trasy
+ # Wyświetlenie długość trasy
 total_distance = sum(distance_matrix[best_route[i], best_route[i + 1]] for i in range(len(best_route) - 1))
 total_distance += distance_matrix[best_route[-1], best_route[0]]  # Wróć do pierwszego miasta
 print("Długość trasy:", total_distance)

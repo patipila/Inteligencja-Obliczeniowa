@@ -203,37 +203,60 @@ for params in paramCombinations:
 # sortowaniee według najlepszej długości ścieżki
 results = sorted(results, key=lambda d: d['bestPathLen'])
 
-print("Najlepszy wynik dla 100 iteracji:")
-for result in results:
-    if result['params']['iteracje'] == 100:
-        print("Parametry:", result['params'])
-        print("Długość trasy:", result['bestPathLen'])
-        print("Trasa:", result['path'])
-        break
+# print("Najlepszy wynik dla 100 iteracji:")
+# for result in results:
+#     if result['params']['iteracje'] == 100:
+#         print("Parametry:", result['params'])
+#         print("Długość trasy:", result['bestPathLen'])
+#         print("Trasa:", result['path'])
+#         break
+#
+#
+# print("Najlepszy wynik dla 250 iteracji:")
+# for result in results:
+#     if result['params']['iteracje'] == 250:
+#         print("Parametry:", result['params'])
+#         print("Długość trasy:", result['bestPathLen'])
+#         print("Trasa:", result['path'])
+#         break
+#
+#
+# print("Najlepszy wynik dla 500 iteracji:")
+# for result in results:
+#     if result['params']['iteracje'] == 500:
+#         print("Parametry:", result['params'])
+#         print("Długość trasy:", result['bestPathLen'])
+#         print("Trasa:", result['path'])
+#         break
+#
+#
+# print("Najlepszy wynik dla 750 iteracji:")
+# for result in results:
+#     if result['params']['iteracje'] == 750:
+#         print("Parametry:", result['params'])
+#         print("Długość trasy:", result['bestPathLen'])
+#         print("Trasa:", result['path'])
+#         break
+
+# Zapisywanie do pliku xlsx
+swapTime = 0
+revTime = 0
+pathLen = len(','.join(str(point) for point in results[0]['path']))
+pathLen = int(0.85 * pathLen)
+workbook = xlsxwriter.Workbook(f"wyniki_TS_48")
+worksheet = workbook.add_worksheet()
+worksheet.set_column(6, 6, pathLen)
+
+row = 1
+for res in results:
+    worksheet.write(row, 0, res['params']['iteracje'])
+    worksheet.write(row, 1, res['params']['warunek_koncowy'])
+    worksheet.write(row, 2, res['params']['tabu'])
+    worksheet.write(row, 3, res['params']['sasiedztwo'])
+    worksheet.write(row, 4, res['bestPathLen'])
+    worksheet.write(row, 5, ','.join(str(point) for point in res['path']))
+    row += 1
+
+workbook.close()
 
 
-print("Najlepszy wynik dla 250 iteracji:")
-for result in results:
-    if result['params']['iteracje'] == 250:
-        print("Parametry:", result['params'])
-        print("Długość trasy:", result['bestPathLen'])
-        print("Trasa:", result['path'])
-        break
-
-
-print("Najlepszy wynik dla 500 iteracji:")
-for result in results:
-    if result['params']['iteracje'] == 500:
-        print("Parametry:", result['params'])
-        print("Długość trasy:", result['bestPathLen'])
-        print("Trasa:", result['path'])
-        break
-
-
-print("Najlepszy wynik dla 750 iteracji:")
-for result in results:
-    if result['params']['iteracje'] == 750:
-        print("Parametry:", result['params'])
-        print("Długość trasy:", result['bestPathLen'])
-        print("Trasa:", result['path'])
-        break

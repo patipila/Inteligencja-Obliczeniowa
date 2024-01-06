@@ -13,14 +13,14 @@ def getPathLength(path, distDict):
     return length
 
 # Zamiana 2 punktów miejscami - swap
-def swapPathPoints(path,point1,point2):
+def swapPath(path,point1,point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
 
-# Odwrócenie ciągu pomiędzy 2 punktami
-def reversePathPart(path, point1, point2):
+# Odwrócenie ciągu pomiędzy 2 punktami - reverse
+def reversePath(path, point1, point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
 
@@ -35,14 +35,13 @@ def reversePathPart(path, point1, point2):
 
 # Funkcja która oblicza długość ścieżki na podstawie obecnej długości i potencjalnej zmiany.
 def getNewPathLength(path, distDict, currentLength, point1, point2):
-    # Znajdujemy indeksy punktów które chcemy zmienić
+
     p1Index = path.index(point1)
     p2Index = path.index(point2)
 
     if (p1Index > p2Index):
         p1Index, p2Index = p2Index, p1Index
 
-    # Część z "Wykreślaniem"
     if (p1Index == 0):
         currentLength -= distDict[f"{path[-1]}:{path[p1Index]}"]
     else:
@@ -57,7 +56,8 @@ def getNewPathLength(path, distDict, currentLength, point1, point2):
 
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
-    # Część z "Wstawianiem."
+
+
     if (p1Index == 0):
         currentLength += distDict[f"{path[-1]}:{path[p1Index]}"]
     else:
@@ -72,7 +72,7 @@ def getNewPathLength(path, distDict, currentLength, point1, point2):
 
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
-    # Zwracamy słownik, który potem trafi do tablicy, w której przechowywać będziemy ewentualne rozwiązania.
+    # Zwracamy słownik, który potem trafi do tablicy, w której przechowywać będziemy rozwiązania.
     return {"point1": point1, "point2": point2, "length": currentLength}
 
 
@@ -83,9 +83,9 @@ def getNewPathLengthReverse(path, distDict, currentLength, point1, point2):
     if (p1Index > p2Index):
         p1Index, p2Index = p2Index, p1Index
 
-    reversePathPart(path, point1, point2)
+    reversePath(path, point1, point2)
     currentLength = getPathLength(path, distDict)
-    reversePathPart(path, point1, point2)
+    reversePath(path, point1, point2)
 
     return {"point1": point1, "point2": point2, "length": currentLength}
 
@@ -131,6 +131,9 @@ for y in range(1,len(vals)+1):
 
 results = []
 impBreak = False
+
+
+# Tabu Search
 
 for params in paramCombinations:
 
@@ -179,9 +182,9 @@ for params in paramCombinations:
                     del tabuList[-1]
 
                 if (params['sasiedztwo'] == 'swap'):
-                    swapPathPoints(path, possibleMove['point1'], possibleMove['point2'])
+                    swapPath(path, possibleMove['point1'], possibleMove['point2'])
                 if (params['sasiedztwo'] == 'reverse'):
-                    reversePathPart(path, possibleMove['point1'], possibleMove['point2'])
+                    reversePath(path, possibleMove['point1'], possibleMove['point2'])
 
                 currentLength = possibleMove['length']
                 if bestPath['length'] > currentLength:
@@ -192,7 +195,7 @@ for params in paramCombinations:
     params['noImprovementIteration'] = impBreak
     results.append({'params': params, 'bestPathLen': bestPath['length'], 'path': bestPath['path']})
 
-# sortowaniee według najlepszej długości ścieżki
+# Sortowaniee według najlepszej długości ścieżki
 results = sorted(results, key=lambda d: d['bestPathLen'])
 
 

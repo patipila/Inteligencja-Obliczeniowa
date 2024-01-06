@@ -5,22 +5,24 @@ from operator import itemgetter
 import time
 import xlsxwriter
 
-#Funkcja, która liczy długość patha
+
+# Funkcja, która liczy długość ścieżki
 def getPathLength(path, distDict):
     length = distDict[f"{path[0]}:{path[-1]}"]
-    for i in range(len(path)-1):
-        length += distDict[f"{path[i]}:{path[i+1]}"]
+    for i in range(len(path) - 1):
+        length += distDict[f"{path[i]}:{path[i + 1]}"]
     return length
 
-#Zamiana 2 punktów miejscami
-def swapPathPoints(path,point1,point2):
+
+# Zamiana 2 punktów miejscami - swap
+def swapPath(path, point1, point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
 
-# odwrócenie ciągu pomiędzy 2 miejscami
-def reversePathPart(path, point1, point2):
+# Odwrócenie ciągu pomiędzy 2 punktami - reverse
+def reversePath(path, point1, point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
 
@@ -33,17 +35,14 @@ def reversePathPart(path, point1, point2):
         path[p1Index + i], path[p2Index - i] = path[p2Index - i], path[p1Index + i]
 
 
-# Funkcja która oblicza długość patha na podstawie obecnej długości i potencjalnej zmiany.
-# Idea tej funkcji obrazkowo https://imgur.com/a/JC1hNfS
+# Funkcja która oblicza długość ścieżki na podstawie obecnej długości i potencjalnej zmiany.
 def getNewPathLength(path, distDict, currentLength, point1, point2):
-    # Znajdujemy indeksy punktów które chcemy zmienić
     p1Index = path.index(point1)
     p2Index = path.index(point2)
 
     if (p1Index > p2Index):
         p1Index, p2Index = p2Index, p1Index
 
-    # Część z "Wykreślaniem"
     if (p1Index == 0):
         currentLength -= distDict[f"{path[-1]}:{path[p1Index]}"]
     else:
@@ -58,7 +57,6 @@ def getNewPathLength(path, distDict, currentLength, point1, point2):
 
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
-    # Część z "Wstawianiem."
     if (p1Index == 0):
         currentLength += distDict[f"{path[-1]}:{path[p1Index]}"]
     else:
@@ -73,13 +71,10 @@ def getNewPathLength(path, distDict, currentLength, point1, point2):
 
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
-    # Zwracamy słownik, który potem trafi do tablicy, w której przechowywać będziemy ewentualne rozwiązania.
+    # Zwracamy słownik, który potem trafi do tablicy, w której przechowywać będziemy rozwiązania.
     return {"point1": point1, "point2": point2, "length": currentLength}
 
 
-# Próba napisania funkcji liczącej długość patha po odwróceniu podobnie jak tej z zamiany, niestety nieudana,
-# dlatego używam getPathLength(path, distDict), który działa i jest prawdopodobnie dużo bardziej czytelny, natomiast
-# ma dużo większą złożoność
 def getNewPathLengthReverse(path, distDict, currentLength, point1, point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
@@ -87,15 +82,14 @@ def getNewPathLengthReverse(path, distDict, currentLength, point1, point2):
     if (p1Index > p2Index):
         p1Index, p2Index = p2Index, p1Index
 
-    reversePathPart(path, point1, point2)
+    reversePath(path, point1, point2)
     currentLength = getPathLength(path, distDict)
-    reversePathPart(path, point1, point2)
+    reversePath(path, point1, point2)
 
     return {"point1": point1, "point2": point2, "length": currentLength}
 
 
-
-# Funkcja, która sprawdza, czy ruch jest na liście tabu.
+# Funkcja, która sprawdza, czy ruch jest na liście tabu
 def isMoveOnTabuList(tabuList, possibleMove):
     if (len(tabuList) == 0):
         return False
@@ -108,37 +102,34 @@ def isMoveOnTabuList(tabuList, possibleMove):
     return False
 
 
-
-#Parametry
-#-liczba iteracji
-#-Ilość iteracji bez poprawy
-#-Długość listy tabu
-#-Rodzaj sąsiedztwa
-iterationList = [100,250,500,750]
-noImprovementList = [4,8,16,""]
-tabuListLengths = [3,4,5,8]
+# Parametry
+iterationList = [100, 250, 500, 750]
+noImprovementList = [4, 8, 16, ""]
+tabuListLengths = [3, 4, 5, 8]
 neighborhoodKinds = ["swap", "reverse"]
 
-#Tworzymy tablicę słowników, żeby łatwiej iterować po kombinacjach parametrów
+# Tworzymy tablicę słowników
 paramCombinations = []
 for iteracje in iterationList:
     for warunek_koncowy in noImprovementList:
         for tabu in tabuListLengths:
             for sasiedztwo in neighborhoodKinds:
-                paramCombinations.append({'iteracje': iteracje, 'warunek_koncowy': warunek_koncowy, 'tabu': tabu, 'sasiedztwo': sasiedztwo})
+                paramCombinations.append(
+                    {'iteracje': iteracje, 'warunek_koncowy': warunek_koncowy, 'tabu': tabu, 'sasiedztwo': sasiedztwo})
 
-
-#Przygotowanie danych, oraz ich miejsca późniejszego zapisania
-file_name, sheet = "C:/Users/emili/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_48.xlsx", "dane"
-excelData = pd.read_excel(file_name, sheet_name = sheet, engine = 'openpyxl')
+# Przygotowanie danych, oraz ich miejsca późniejszego zapisania
+file_name, sheet = "C:/Users/emili/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_48.xlsx", "Dane"
+excelData = pd.read_excel(file_name, sheet_name=sheet, engine='openpyxl')
 vals = excelData.values
 distDict = {}
-for y in range(1,len(vals)+1):
+for y in range(1, len(vals) + 1):
     for x in range(0, len(vals)):
-        distDict[f"{x+1}:{y}"] = vals[x,y]
+        distDict[f"{x + 1}:{y}"] = vals[x, y]
 
 results = []
 impBreak = False
+
+# Tabu Search
 
 for params in paramCombinations:
 
@@ -187,9 +178,9 @@ for params in paramCombinations:
                     del tabuList[-1]
 
                 if (params['sasiedztwo'] == 'swap'):
-                    swapPathPoints(path, possibleMove['point1'], possibleMove['point2'])
+                    swapPath(path, possibleMove['point1'], possibleMove['point2'])
                 if (params['sasiedztwo'] == 'reverse'):
-                    reversePathPart(path, possibleMove['point1'], possibleMove['point2'])
+                    reversePath(path, possibleMove['point1'], possibleMove['point2'])
 
                 currentLength = possibleMove['length']
                 if bestPath['length'] > currentLength:
@@ -200,43 +191,8 @@ for params in paramCombinations:
     params['noImprovementIteration'] = impBreak
     results.append({'params': params, 'bestPathLen': bestPath['length'], 'path': bestPath['path']})
 
-# sortowaniee według najlepszej długości ścieżki
+# Sortowaniee według najlepszej długości ścieżki
 results = sorted(results, key=lambda d: d['bestPathLen'])
-
-# print("Najlepszy wynik dla 100 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 100:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
-#
-#
-# print("Najlepszy wynik dla 250 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 250:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
-#
-#
-# print("Najlepszy wynik dla 500 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 500:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
-#
-#
-# print("Najlepszy wynik dla 750 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 750:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
 
 # Zapisywanie do pliku xlsx
 swapTime = 0

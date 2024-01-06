@@ -19,7 +19,7 @@ def swapPathPoints(path,point1,point2):
     path[p1Index], path[p2Index] = path[p2Index], path[p1Index]
 
 
-# odwrócenie ciągu pomiędzy 2 miejscami
+# odwrócenie ciągu pomiędzy 2 punktami
 def reversePathPart(path, point1, point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
@@ -34,7 +34,6 @@ def reversePathPart(path, point1, point2):
 
 
 # Funkcja która oblicza długość patha na podstawie obecnej długości i potencjalnej zmiany.
-# Idea tej funkcji obrazkowo https://imgur.com/a/JC1hNfS
 def getNewPathLength(path, distDict, currentLength, point1, point2):
     # Znajdujemy indeksy punktów które chcemy zmienić
     p1Index = path.index(point1)
@@ -77,9 +76,6 @@ def getNewPathLength(path, distDict, currentLength, point1, point2):
     return {"point1": point1, "point2": point2, "length": currentLength}
 
 
-# Próba napisania funkcji liczącej długość patha po odwróceniu podobnie jak tej z zamiany, niestety nieudana,
-# dlatego używam getPathLength(path, distDict), który działa i jest prawdopodobnie dużo bardziej czytelny, natomiast
-# ma dużo większą złożoność
 def getNewPathLengthReverse(path, distDict, currentLength, point1, point2):
     p1Index = path.index(point1)
     p2Index = path.index(point2)
@@ -110,16 +106,12 @@ def isMoveOnTabuList(tabuList, possibleMove):
 
 
 #Parametry
-#-liczba iteracji
-#-Ilość iteracji bez poprawy
-#-Długość listy tabu
-#-Rodzaj sąsiedztwa
 iterationList = [100,250,500,750]
 noImprovementList = [4,8,16,""]
-tabuListLengths = [3,4,5]
+tabuListLengths = [3,4,5,8]
 neighborhoodKinds = ["swap", "reverse"]
 
-#Tworzymy tablicę słowników, żeby łatwiej iterować po kombinacjach parametrów
+#Tworzymy tablicę słowników
 paramCombinations = []
 for iteracje in iterationList:
     for warunek_koncowy in noImprovementList:
@@ -129,7 +121,7 @@ for iteracje in iterationList:
 
 
 #Przygotowanie danych, oraz ich miejsca późniejszego zapisania
-file_name, sheet = "C:/Users/emili/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_48.xlsx", "dane"
+file_name, sheet = "C:/Users/emili/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_76.xlsx", "Arkusz1"
 excelData = pd.read_excel(file_name, sheet_name = sheet, engine = 'openpyxl')
 vals = excelData.values
 distDict = {}
@@ -203,47 +195,13 @@ for params in paramCombinations:
 # sortowaniee według najlepszej długości ścieżki
 results = sorted(results, key=lambda d: d['bestPathLen'])
 
-# print("Najlepszy wynik dla 100 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 100:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
-#
-#
-# print("Najlepszy wynik dla 250 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 250:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
-#
-#
-# print("Najlepszy wynik dla 500 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 500:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
-#
-#
-# print("Najlepszy wynik dla 750 iteracji:")
-# for result in results:
-#     if result['params']['iteracje'] == 750:
-#         print("Parametry:", result['params'])
-#         print("Długość trasy:", result['bestPathLen'])
-#         print("Trasa:", result['path'])
-#         break
 
 # Zapisywanie do pliku xlsx
 swapTime = 0
 revTime = 0
 pathLen = len(','.join(str(point) for point in results[0]['path']))
 pathLen = int(0.85 * pathLen)
-workbook = xlsxwriter.Workbook(f"wyniki_TS_48")
+workbook = xlsxwriter.Workbook(f"wyniki_TS_76")
 worksheet = workbook.add_worksheet()
 worksheet.set_column(6, 6, pathLen)
 

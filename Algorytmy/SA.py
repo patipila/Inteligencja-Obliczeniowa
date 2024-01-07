@@ -1,92 +1,80 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import random
 import math
 
-# Wczytaj dane z pliku Excel
-data = pd.read_excel("/Users/aleksandrapalka/Desktop/Inteligencja-Obliczeniowa/Dane/Dane_TSP_48.xlsx",
-                     sheet_name="dane")
-cities = data.iloc[:, 1:].values  # Pomijamy pierwszą kolumnę i wiersz
+# Funkcja obliczająca długość trasy
+def calculate_distance(route, data):
+    distance = 0
+    for i in range(len(route) - 1):
+        distance += data.iloc[route[i], route[i + 1]]
+    return distance + data.iloc[route[-1], route[0]]  # Wróć do punktu początkowego
 
 
-# Funkcja obliczająca koszt ścieżki
-def calculate_cost(solution):
-    total_distance = 0
-    for i in range(len(solution) - 1):
-        total_distance += cities[solution[i] - 1, solution[i + 1] - 1]
-    total_distance += cities[solution[-1] - 1, solution[0] - 1]
-    return total_distance
+# Funkcja sąsiedztwa I
+def neighborhood_type_I(route):
+    new_route = route.copy()
+    i, j = random.sample(range(len(route)), 2)
+    new_route[i], new_route[j] = new_route[j], new_route[i]
+    return new_route
 
 
-# Trzy różne strategie generowania sąsiednich rozwiązań
-def generate_neighbor_swap(solution):
-    new_solution = solution[:]
-    idx1, idx2 = random.sample(range(len(new_solution)), 2)
-    new_solution[idx1], new_solution[idx2] = new_solution[idx2], new_solution[idx1]
-    return new_solution
+# Funkcja sąsiedztwa II
+def neighborhood_type_II(route):
+    new_route = route.copy()
+    i = random.randint(0, len(route) - 1)
+    j = (i + 1) % len(route)
+    new_route[i], new_route[j] = new_route[j], new_route[i]
+    return new_route
 
 
-def generate_neighbor_reverse(solution):
-    new_solution = solution[:]
-    start, end = random.sample(range(len(new_solution)), 2)
-    if start > end:
-        start, end = end, start
-    new_solution[start:end + 1] = reversed(new_solution[start:end + 1])
-    return new_solution
+# Implementacja algorytmu SA
+def simulated_annealing(data, neighborhood_func, iterations, initial_temperature, alpha, reduction_method):
+    n = len(data)
+    current_route = list(range(n))
+    random.shuffle(current_route)
+    current_distance = calculate_distance(current_route, data)
+
+    best_route = current_route.copy()
+    best_distance = current_distance
+
+    for iteration in range(iterations):
+        if reduction_method == 'GEOMETRIC':
+            temperature = initial_temperature * (alpha ** iteration)
+        elif reduction_method == 'LINEAR':
+            temperature = initial_temperature / (1 + alpha * iteration)
+
+        new_route = neighborhood_func(current_route)
+        new_distance = calculate_distance(new_route, data)
+
+        if new_distance < current_distance or random.random() < math.exp((current_distance - new_distance) / temperature):
+            current_route = new_route.copy()
+            current_distance = new_distance
+
+            if new_distance < best_distance:
+                best_route = new_route.copy()
+                best_distance = new_distance
+
+    return best_route, best_distance
 
 
-def generate_neighbor_shift(solution):
-    new_solution = solution[:]
-    start, end = random.sample(range(len(new_solution)), 2)
-    segment = new_solution[start:end + 1]
-    del new_solution[start:end + 1]
-    pos = random.randint(0, len(new_solution))
-    new_solution = new_solution[:pos] + segment + new_solution[pos:]
-    return new_solution
+# Wprowadzenie danych od użytkownika
+path = input("Podaj ścieżkę do pliku Excel z danymi: ")
+data = pd.read_excel(path, index_col=0)
 
+neighborhood_choice = input("Wybierz rodzaj sąsiedztwa (I/II): ").upper()
+neighborhood_func = neighborhood_type_I if neighborhood_choice == 'I' else neighborhood_type_II
 
-# Algorytm Symulowanego Wyżarzania z trzema strategiami sąsiednich rozwiązań
-def simulated_annealing(initial_solution, temperature, cooling_rate, iterations):
-    current_solution = initial_solution[:]
-    current_cost = calculate_cost(current_solution)
+iterations = int(input("Podaj liczbę iteracji: "))
+initial_temperature = float(input("Podaj początkową temperaturę: "))
 
-    best_solution = current_solution[:]
-    best_cost = current_cost
+reduction_method = input("Wybierz metodę redukcji temperatury (GEOMETRIC/LINEAR): ").upper()
 
-    for i in range(iterations):
-        # Wybór strategii generowania sąsiedniego rozwiązania
-        strategy = random.choice([generate_neighbor_swap, generate_neighbor_reverse, generate_neighbor_shift])
-        new_solution = strategy(current_solution)
+alpha = float(input("Podaj wartość mnożnika redukcji: "))
 
-        new_cost = calculate_cost(new_solution)
-
-        # Akceptacja nowego rozwiązania
-        if new_cost < current_cost or random.random() < math.exp((current_cost - new_cost) / temperature):
-            current_solution = new_solution[:]
-            current_cost = new_cost
-
-            if new_cost < best_cost:
-                best_solution = new_solution[:]
-                best_cost = new_cost
-
-        # Obniżanie temperatury
-        temperature *= cooling_rate
-
-    return best_solution, best_cost
-
-
-# Parametry SA
-initial_solution = list(range(1, 49))  # początkowe rozwiązanie
-initial_temperature = 1000.0
-cooling_rate = 0.995
-iterations = 10000
-
-# Uruchomienie algorytmu
-best_solution, best_cost = simulated_annealing(initial_solution, initial_temperature, cooling_rate, iterations)
+# Wykonanie algorytmu SA
+best_route, best_distance = simulated_annealing(data, neighborhood_func, iterations, initial_temperature, alpha, reduction_method)
 
 # Wyświetlenie wyników
-print(f"Najlepsze rozwiązanie: {best_solution}")
-print(f"Koszt najlepszego rozwiązania: {best_cost}")
-
-
-
+print(f"Najlepsza trasa: {best_route}")
+print(f"Długość najlepszej trasy: {best_distance}")

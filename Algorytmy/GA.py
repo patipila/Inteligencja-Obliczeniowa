@@ -216,7 +216,7 @@ def print_route(route, distance_matrix):
     print("Total Distance:", total_distance)
     
 
-file_path = "Dane/Dane_TSP_76.xlsx"
+file_path = "Dane/Dane_TSP_127.xlsx"
 distance_matrix = read_distance_matrix(file_path)
 
 population_size = 100
@@ -230,7 +230,7 @@ max_stagnation=1000000
 
 df_distance = pd.DataFrame(columns=['Distance'])
 df_cities=pd.DataFrame()
-save_file_name = '76_pop%s_gen%s_mutat_rate%s_cross_rate%s_mutat_type%s_cross_type%s_parents%s_brake%s.xlsx' % (
+save_file_name = '127_pop%s_gen%s_mutat_rate%s_cross_rate%s_mutat_type%s_cross_type%s_parents%s_brake%s.xlsx' % (
     population_size,generations, mutation_rate, crossover_rate, mutation_type, crossover_method,
     selection_type,max_stagnation
 )
@@ -242,6 +242,6 @@ for i in range(1,11):
     df_cities[i]= [city + 1 for city in best_individual[0]]
     print(i)
 
-with pd.ExcelWriter("Wyniki_GA/76/"+save_file_name) as writer:
+with pd.ExcelWriter("Wyniki_GA/127/"+save_file_name) as writer:
     df_distance.to_excel(writer, sheet_name='Distance', index=True)
     df_cities.to_excel(writer, sheet_name='Route', index=False)

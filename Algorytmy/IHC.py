@@ -67,52 +67,27 @@ def hill_climbing_with_multi_start(dane, liczba_iteracji, num_starts):
     return {'kolejnosc': best_kolejnosc, 'odl': best_odl}
 
 # Parametry
-distances_data = pd.read_excel("C:/Users/magda/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Przykład_TSP_29.xlsx",header=None)
-liczba_iteracji = 10
-num_starts = 10
+distances_data = pd.read_excel("Dane/Dane_TSP_76",header=None)
+liczba_iteracji = 1000
+num_starts = 100
 
 # Implementacja funkcji
+df_kolejnosc = pd.DataFrame()  # DataFrame do przechowywania wyników kolejności
+df_odleglosci = pd.DataFrame()  # DataFrame do przechowywania wyników odległości
 for nazwa_sasiedztwa in ['swap', 'insert', 'reverse']:
     print(f"Metoda generowania sąsiedztwa: {nazwa_sasiedztwa}")
-    result = hill_climbing_with_multi_start(distances_data, liczba_iteracji, num_starts)
-    print(f"Najlepsza kolejnosc: {result['kolejnosc']}")
-    print(f"Długość trasy: {result['odl']}\n")
 
-'''
-def hill_climbing(dane, liczba_iteracji):
-    liczba_miast = len(dane)
-    naj_kolejnosc = None
-    naj_odl = float('inf')
+    # Utwórz obiekt ExcelWriter
+    with pd.ExcelWriter(f"Wyniki_IHC/wyniki_{nazwa_sasiedztwa}_127.xlsx") as writer:
+        for i in range(10):  # Uruchom 10 razy
+            result = hill_climbing_with_multi_start(distances_data, liczba_iteracji, num_starts)
+            print(f"Runda {i + 1} - Najlepsza kolejnosc: {result['kolejnosc']}, Długość trasy: {result['odl']}")
 
-    for _ in range(liczba_iteracji):
-        aktualna_kolejnosc = randomowa_kolejnosc(liczba_miast)
-        aktualna_odl = oblicz_odl(aktualna_kolejnosc, dane)
-
-        while True:
-            nowa_kolejnosc = randomowa_kolejnosc(liczba_miast)
-            nowa_odl = oblicz_odl(nowa_kolejnosc, dane)
-
-            if nowa_odl < aktualna_odl:
-                aktualna_kolejnosc = nowa_kolejnosc
-                aktualna_odl = nowa_odl
-            else:
-                break  # Wyjdź z pętli wspinaczki, jeśli nie można poprawić trasy
-
-        if aktualna_odl < naj_odl:
-            naj_kolejnosc = aktualna_kolejnosc
-            naj_odl = aktualna_odl
-
-    return naj_kolejnosc, naj_odl
-
-# Przykładowe dane - macierz odległości między miastami
-dane = pd.read_excel("C:/Users/magda/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Przykład_TSP_29.xlsx",header=None)
-
-liczba_iteracji = 100
-
-# Uruchom algorytm wspinaczki z multistartem
-naj_kolejnosc, naj_odl = hill_climbing(dane, liczba_iteracji)
-
-# Wyświetl wyniki
-print("Najlepsza kolejnosc:", naj_kolejnosc)
-print("Długość trasy:", naj_odl)
-'''
+            # Zapisz wyniki do DataFrame
+            col_kolejnosc = f'Proba_{i + 1}'
+            col_odl = f'Proba_{i + 1}'
+            df_kolejnosc[col_kolejnosc] = result['kolejnosc']
+            df_odleglosci[col_odl] = [result['odl']]
+            
+            df_kolejnosc.to_excel(writer, sheet_name=f'Kolejnosc', index=False)
+            df_odleglosci.to_excel(writer, sheet_name=f'DlugoscTrasy', index=False)

@@ -118,7 +118,7 @@ for iteracje in iterationList:
                     {'iteracje': iteracje, 'warunek_koncowy': warunek_koncowy, 'tabu': tabu, 'sasiedztwo': sasiedztwo})
 
 # Przygotowanie danych, oraz ich miejsca późniejszego zapisania
-file_name, sheet = "C:/Users/emili/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_48.xlsx", "Dane"
+file_name, sheet = "C:/Users/emili/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_127.xlsx", "Dane"
 excelData = pd.read_excel(file_name, sheet_name=sheet, engine='openpyxl')
 vals = excelData.values
 distDict = {}

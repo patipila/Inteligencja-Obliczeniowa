@@ -36,13 +36,33 @@ def najblizszy_sasiad(dane, start):
 
     return kolejnosc
 
-dane = pd.read_excel("C:/Users/magda/Documents/GitHub/Inteligencja-Obliczeniowa/Dane/Dane_TSP_48k.xlsx",header=None)
+dane = pd.read_excel("C:Dane/Przykład_TSP_29.xlsx",header=None)
 start = losowe_miasto_startowe(dane)
 trasa = najblizszy_sasiad(dane, start)
 odleglosc = oblicz_odl(trasa, dane)
 
 print("Trasa:", trasa)
 print("Odleglosc:", odleglosc)
+
+# Implementacja funkcji
+df_kolejnosc = pd.DataFrame()  # DataFrame do przechowywania wyników kolejności
+df_odleglosci = pd.DataFrame()  # DataFrame do przechowywania wyników odległości
+
+with pd.ExcelWriter(f"Wyniki_NN/wyniki_127.xlsx") as writer:
+    for i in range(10):  # Uruchom 10 razy
+        start = losowe_miasto_startowe(dane)
+        trasa = najblizszy_sasiad(dane, start)
+        odleglosc = oblicz_odl(trasa, dane)
+        print(f"Runda {i + 1} - Najlepsza kolejnosc: {trasa}, Długość trasy: {odleglosc}")
+
+        # Zapisz wyniki do DataFrame
+        col_kolejnosc = f'Proba_{i + 1}'
+        col_odl = f'Proba_{i + 1}'
+        df_kolejnosc[col_kolejnosc] = trasa
+        df_odleglosci[col_odl] = odleglosc
+            
+        df_kolejnosc.to_excel(writer, sheet_name=f'Kolejnosc', index=False)
+        df_odleglosci.to_excel(writer, sheet_name=f'DlugoscTrasy', index=False)
 
 
 

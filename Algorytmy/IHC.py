@@ -67,7 +67,7 @@ def hill_climbing_with_multi_start(dane, liczba_iteracji, num_starts):
     return {'kolejnosc': best_kolejnosc, 'odl': best_odl}
 
 # Parametry
-distances_data = pd.read_excel("Dane/Dane_TSP_76",header=None)
+distances_data = pd.read_excel("Dane/Dane_TSP_127.xlsx",header=None)
 liczba_iteracji = 1000
 num_starts = 100
 

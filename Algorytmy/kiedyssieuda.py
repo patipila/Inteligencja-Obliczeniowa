@@ -101,7 +101,7 @@ def mutate_swap(individual, mutation_rate):
     return individual
 
 
-def mutate_reverse(individual, mutation_rate):
+def mutate_reversed(individual, mutation_rate):
     if random.uniform(0, 1) < mutation_rate:
         start, end = random.sample(range(len(individual)), 2)
         if start > end:
@@ -109,13 +109,6 @@ def mutate_reverse(individual, mutation_rate):
         individual[start:end + 1] = reversed(individual[start:end + 1])
     return individual
 
-def mutate_insert(individual, mutation_rate):
-    if random.uniform(0, 1) < mutation_rate:
-        gene_to_insert = random.choice(individual)
-        index_to_insert = random.randint(0, len(individual))
-        individual.insert(index_to_insert, gene_to_insert)
-        individual = list(set(individual))
-    return individual
 
 def initialize_population(population_size, num_cities):
     population = []
@@ -126,6 +119,7 @@ def initialize_population(population_size, num_cities):
     return population  
 
 
+# Define a function to select parents based on the selection type
 def select_parents(population, distance_matrix, selection_type):
     if selection_type == 'tournament':
         return tournament_selection(population, distance_matrix)
@@ -136,6 +130,7 @@ def select_parents(population, distance_matrix, selection_type):
     else:
         raise ValueError("Invalid selection type. Supported types: 'tournament', 'rank', 'roulette'.")
 
+# Define a function to perform crossover based on the crossover type
 def crossover_type(parent1, parent2, crossover_type):
     if crossover_type == 'PMX':
         return crossover_PMX(parent1, parent2)
@@ -144,15 +139,14 @@ def crossover_type(parent1, parent2, crossover_type):
     else:
         raise ValueError("Invalid crossover type. Supported types: 'PMX', 'OX'.")
 
+# Define a function to perform mutation based on the mutation type
 def mutate_type(individual, mutation_rate, mutation_type):
     if mutation_type == 'swap':
         return mutate_swap(individual, mutation_rate)
     elif mutation_type == 'reversed':
-        return mutate_reverse(individual, mutation_rate)
-    elif mutation_type == 'insert':
-        return mutate_insert(individual, mutation_rate)
+        return mutate_reversed(individual, mutation_rate)
     else:
-        raise ValueError("Invalid mutation type. Supported types: 'swap', 'reversed','insert'.")
+        raise ValueError("Invalid mutation type. Supported types: 'swap', 'reversed'.")
 
 
 def remove_worst_individuals(population, distance_matrix):
@@ -205,7 +199,7 @@ def genetic_algorithm(distance_matrix, population_size, generations, crossover_r
 
         if stagnation_counter >= max_stagnation:
            break
-        #print(g,"-",calculate_distance(best_individual, distance_matrix))
+        print(g,"-",calculate_distance(best_individual, distance_matrix))
         
     return best_individual, best_fitness
 
@@ -216,32 +210,34 @@ def print_route(route, distance_matrix):
     print("Total Distance:", total_distance)
     
 
-file_path = "Dane/Dane_TSP_76.xlsx"
+# Example usage:
+file_path = "Dane/Dane_TSP_127.xlsx"
 distance_matrix = read_distance_matrix(file_path)
 
-population_size = 100
-generations = 1000
-crossover_rate = 0.8
-mutation_rate = 0.5
+population_size = 50
+generations = 1000000
+crossover_rate = 0.4
+mutation_rate = 0.1
 selection_type = 'tournament'  # or 'rank', 'roulette'
-crossover_method = 'PMX'  # or OX
+crossover_method = 'OX'  # or crossover_OX
 mutation_type = 'swap'  # or 'reversed'
-max_stagnation=1000000
+max_stagnation=100000
 
 df_distance = pd.DataFrame(columns=['Distance'])
 df_cities=pd.DataFrame()
-save_file_name = '76_pop%s_gen%s_mutat_rate%s_cross_rate%s_mutat_type%s_cross_type%s_parents%s_brake%s.xlsx' % (
-    population_size,generations, mutation_rate, crossover_rate, mutation_type, crossover_method,
-    selection_type,max_stagnation
+save_file_name = '127_pop%s_gen%s_mutat_rate%s_cross_rate%s_mutat_type%s_cross_type%s.xlsx' % (
+    population_size,generations, mutation_rate, crossover_rate, mutation_type, crossover_method
 )
 
 for i in range(1,11):
     best_individual = genetic_algorithm(distance_matrix, population_size, generations, crossover_rate, mutation_rate, selection_type, crossover_method, mutation_type, max_stagnation)
     print_route(best_individual[0], distance_matrix)
-    df_distance.loc[i]= calculate_distance(best_individual[0], distance_matrix)
+    total_distance= calculate_distance(best_individual[0], distance_matrix)
+    df_distance.loc[i]= total_distance
     df_cities[i]= [city + 1 for city in best_individual[0]]
-    print(i)
 
-with pd.ExcelWriter("Wyniki_GA/76/"+save_file_name) as writer:
+print(df_distance)
+
+with pd.ExcelWriter("Wyniki_GA/127/"+save_file_name) as writer:
     df_distance.to_excel(writer, sheet_name='Distance', index=True)
     df_cities.to_excel(writer, sheet_name='Route', index=False)

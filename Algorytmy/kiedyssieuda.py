@@ -219,7 +219,7 @@ generations = 1000000
 crossover_rate = 0.4
 mutation_rate = 0.1
 selection_type = 'tournament'  # or 'rank', 'roulette'
-crossover_method = 'OX'  # or crossover_OX
+crossover_method = 'PMX'  # or crossover_OX
 mutation_type = 'swap'  # or 'reversed'
 max_stagnation=100000
 
